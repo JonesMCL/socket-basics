@@ -1,11 +1,20 @@
-//var name = getQueryVariable("name");
-//var room = getQueryVariable("room");
+var name = getQueryVariable("name") || "Anonymous";
+var room = getQueryVariable("chatroom");
+console.log("fetched Room: " + room);
+console.log("fetched name: " + name);
 var socket = io();
 
-//console.log(name + " wants to join " + room);
+//Update h1 tag for room title
+jQuery('.room-title-test').text(room);
+
+console.log(name + ' wants to join ' + room);
 
 socket.on("connect", function () {
 	console.log("connected to socket.io server!");
+	socket.emit("joinRoom", {
+		name: name,
+		room: room
+	});
 });
 
 socket.on("message", function (message) {
@@ -16,16 +25,15 @@ socket.on("message", function (message) {
 	console.log(message.text);
 	
 	jQuery(".messages").append('<p><strong>' + message.name + ' ' + momentTimestamp.local().format('h:mm a') + '</strong></p>');
-	//console.log("jQuery Messages: " + jQuery(".messages").name + "message.name: " + message.name);
-	//jQuery(".messages").append('<p><strong>' + momentTimestamp.local().format('h:mm a') + ': </strong>' + message.text + '</p>');
 	jQuery(".messages").append('<p>' + message.text + '</p>');
 })
 
 function submit() {
 	var urlParams = new URLSearchParams(window.location.search);
 	var messageFrom = urlParams.get("name");
+	var roomName = urlParams.get("chatroom");
 	// urlPrams und messageForm liefert richtiges Ergebnis
 	var fetchedStr = document.getElementById("text1").value;
-	socket.emit("message", {text: fetchedStr, name: messageFrom});
+	socket.emit("message", {text: fetchedStr, name: messageFrom, room: roomName});
 	document.getElementById("text1").value = "";
 }
